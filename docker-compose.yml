@@ -1,0 +1,29 @@
+# TODO: Build a docker-compose.yml with two Postgres instances and Airflow.
+#
+# Services you'll need:
+#   1. postgres-airflow  — Postgres for Airflow's own metadata DB
+#   2. postgres-app       — Postgres acting as your "data warehouse"
+#      (mount sql/create_tables.sql to /docker-entrypoint-initdb.d/ so it
+#      auto-runs on first startup)
+#   3. airflow-init        — one-off container that runs `airflow db migrate`
+#      and creates an admin user
+#   4. airflow-webserver   — the Airflow UI, expose port 8080
+#   5. airflow-scheduler    — runs your DAGs
+#
+# Tips:
+#   - Use environment variables (from .env) rather than hardcoding credentials
+#   - Mount ./dags, ./src, ./dbt_project into the Airflow containers so they
+#     can see your code
+#   - Use healthchecks on the Postgres services so Airflow waits for them
+#     to be ready before starting
+#   - Look at the official Airflow docker-compose reference as a starting
+#     point: https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html
+
+version: "3.8"
+
+services:
+  # TODO: postgres-airflow
+  # TODO: postgres-app
+  # TODO: airflow-init
+  # TODO: airflow-webserver
+  # TODO: airflow-scheduler

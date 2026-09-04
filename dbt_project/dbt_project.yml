@@ -1,0 +1,11 @@
+# TODO: fill in a standard dbt_project.yml
+#
+# You'll need at minimum:
+#   name, version, config-version, profile (must match dbt_project/profiles.yml)
+#   model-paths: ["models"]
+#
+# Consider configuring:
+#   - staging models as views (they're cheap, cleaned pass-throughs)
+#   - mart models as tables (queried often, worth materializing)
+#
+# See: https://docs.getdbt.com/reference/dbt_project.yml

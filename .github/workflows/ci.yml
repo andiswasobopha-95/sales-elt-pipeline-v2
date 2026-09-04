@@ -1,0 +1,28 @@
+# TODO: Build a CI workflow that runs on every push/PR to main.
+#
+# Steps it should probably include:
+#   1. Checkout code
+#   2. Set up Python
+#   3. pip install -r requirements.txt
+#   4. Lint with ruff (pip install ruff, then `ruff check src/ tests/ dags/`)
+#   5. Run pytest
+#   6. Spin up a Postgres service container, apply sql/create_tables.sql
+#   7. Run `dbt debug` and `dbt compile` against it
+#
+# Tip: GitHub Actions supports "services" in a job to spin up a temporary
+# Postgres container just for the CI run — look up the `services:` key.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # TODO: add the rest of the steps

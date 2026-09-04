@@ -1,0 +1,19 @@
+# TODO: configure the Postgres connection for dbt.
+#
+# Structure looks like:
+#
+# <profile_name>:
+#   target: dev
+#   outputs:
+#     dev:
+#       type: postgres
+#       host: ...
+#       port: ...
+#       user: ...
+#       pass: ...
+#       dbname: ...
+#       schema: public
+#       threads: 4
+#
+# Tip: use env_var() so this reads from environment variables instead of
+# hardcoding credentials, e.g. "{{ env_var('APP_DB_HOST', 'localhost') }}"
