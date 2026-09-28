@@ -21,55 +21,53 @@
 --   "rating": { "rate": 3.9, "count": 120 }
 -- }
 
-CREATE SCHEMA IF NOT EXISTS raw;
-
--- CREATE TABLE raw.products ( ... );
-
--- CREATE TABLE raw.orders ( ... );
-
--- CREATE TABLE raw.order_items ( ... );
 
 CREATE SCHEMA IF NOT EXISTS raw;
 
 -- 1. Products Table
 -- Maps directly to the Fake Store API response.
-CREATE TABLE raw.products (
+CREATE TABLE IF NOT EXISTS raw.products (
     id INT PRIMARY KEY,
     title TEXT NOT NULL,
     price NUMERIC(10, 2) NOT NULL,
-    category VARCHAR(100),
+    category TEXT NOT NULL,
     description TEXT,
     -- Flattening the nested JSON rating object for standard relational querying
-    rating_rate NUMERIC(3, 1), 
-    rating_count INT
+    rating_rate NUMERIC(3, 1),
+    rating_count INT,
+    loaded_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- 2. Orders Table
 -- Synthetic order headers.
-CREATE TABLE raw.orders (
-    order_id INT PRIMARY KEY, -- Can be changed to SERIAL/GENERATED ALWAYS AS IDENTITY if auto-generating in the DB
+CREATE TABLE IF NOT EXISTS raw.orders (
+    order_id INT PRIMARY KEY,
     customer_id INT NOT NULL,
-    order_date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    status VARCHAR(50) NOT NULL
+    order_date TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    status TEXT NOT NULL,
+    loaded_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- 3. Order Items Table
--- Links orders and products. Uses a composite primary key since a specific product 
--- should generally only appear once per order.
-CREATE TABLE raw.order_items (
+-- Links orders and products. Composite primary key: a product appears at most
+-- once per order. unit_price records the price paid at order time, so later
+-- product price changes don't rewrite history.
+CREATE TABLE IF NOT EXISTS raw.order_items (
     order_id INT NOT NULL,
     product_id INT NOT NULL,
     quantity INT NOT NULL DEFAULT 1,
-    
+    unit_price NUMERIC(10, 2) NOT NULL,
+    loaded_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+
     PRIMARY KEY (order_id, product_id),
     CONSTRAINT fk_order
-        FOREIGN KEY (order_id) 
+        FOREIGN KEY (order_id)
         REFERENCES raw.orders(order_id)
         ON DELETE CASCADE,
     CONSTRAINT fk_product
-        FOREIGN KEY (product_id) 
+        FOREIGN KEY (product_id)
         REFERENCES raw.products(id)
         ON DELETE RESTRICT,
-    CONSTRAINT chk_quantity 
+    CONSTRAINT chk_quantity
         CHECK (quantity > 0)
 );
