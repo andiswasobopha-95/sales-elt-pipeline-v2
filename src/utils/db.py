@@ -14,13 +14,6 @@ import os
 
 import psycopg2
 
-
-# def get_connection():
-    # TODO: implement this
-    # raise NotImplementedError
-
-
-
 def get_connection():
     """
     Returns a psycopg2 connection to the PostgreSQL database using
@@ -28,10 +21,10 @@ def get_connection():
     """
     # Fetch environment variables with sensible defaults for local development
     host = os.environ.get("APP_DB_HOST", "localhost")
-    port = os.environ.get("APP_DB_PORT", "5432")
-    dbname = os.environ.get("APP_DB_NAME", "postgres")
-    user = os.environ.get("APP_DB_USER", "postgres")
-    password = os.environ.get("APP_DB_PASSWORD", "postgres")
+    port = os.environ.get("APP_DB_PORT", "5433")
+    dbname = os.environ.get("APP_DB_NAME", "sales_dw")
+    user = os.environ.get("APP_DB_USER", "sales_user")
+    password = os.environ.get("APP_DB_PASSWORD", "sales_pass")
 
     # Establish and return the database connection
     return psycopg2.connect(
