@@ -113,7 +113,7 @@ def generate_and_load_orders(cur, product_ids, products):
         
         # 2. Generate Order Items
         # Use random.sample to guarantee unique products per order (satisfying the composite PK)
-        num_items = random.randint(1, 4)
+        num_items = random.randint(1, min(4, len(product_ids)))
         chosen_products = random.sample(product_ids, num_items)
         
         for product_id in chosen_products:
@@ -163,7 +163,7 @@ def run():
     with get_connection() as conn:
         with conn.cursor() as cur:
             upsert_products(cur, products)
-            generate_and_load_orders(cur, product_ids)
+            generate_and_load_orders(cur, product_ids, products)
             
     print("Load stage completed successfully.")
 

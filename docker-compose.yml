@@ -19,9 +19,27 @@
 #   - Look at the official Airflow docker-compose reference as a starting
 #     point: https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html
 
-version: "3.8"
 
 services:
+  postgres-app:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sales_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sales_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-sales_dw}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg_app_data:/var/lib/postgresql/data
+      - ./sql/create_tables.sql:/docker-entrypoint-initdb.d/01_create_tables.sql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U","sales_user"]
+      interval: 5s
+      retries: 5
+
+volumes:
+  pg_app_data:
+
   # TODO: postgres-airflow
   # TODO: postgres-app
   # TODO: airflow-init
