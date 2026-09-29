@@ -21,38 +21,7 @@ Things to think about:
 - Should you wrap everything in a transaction so a failure doesn't leave
   the DB half-updated?
 """
-import os
-from pathlib import Path
 
-from src.utils.db import get_connection
-
-DATA_DIR = Path(os.environ.get("RAW_DATA_DIR", "data/raw"))
-ORDER_COUNT = int(os.environ.get("SYNTHETIC_ORDER_COUNT", "500"))
-SEED = int(os.environ.get("RANDOM_SEED", "42"))
-
-
-def load_raw_products(path: Path = DATA_DIR / "products_latest.json"):
-    # TODO: implement this
-    raise NotImplementedError
-
-
-def upsert_products(cur, products):
-    # TODO: implement this
-    raise NotImplementedError
-
-
-def generate_and_load_orders(cur, product_ids):
-    # TODO: implement this
-    raise NotImplementedError
-
-
-def run():
-    # TODO: tie it all together
-    raise NotImplementedError
-
-
-if __name__ == "__main__":
-    run()
 import json
 import os
 import random
@@ -115,12 +84,15 @@ def upsert_products(cur, products):
     print(f"Upserted {len(values)} products.")
 
 
-def generate_and_load_orders(cur, product_ids):
+def generate_and_load_orders(cur, product_ids, products):
     """
     Generates synthetic orders and order items, and loads them idempotently.
     Seed guarantees the same orders are generated across runs.
     """
     random.seed(SEED)
+
+    # Lookup from product id to price, so we can record the price paid on each line
+    price_by_product_id = {p["id"]: p["price"] for p in products}
     
     # Base date for deterministic random dates
     base_date = datetime(2026, 1, 1)
@@ -146,7 +118,8 @@ def generate_and_load_orders(cur, product_ids):
         
         for product_id in chosen_products:
             quantity = random.randint(1, 5)
-            order_items.append((order_id, product_id, quantity))
+            unit_price = price_by_product_id[product_id]
+            order_items.append((order_id, product_id, quantity, unit_price))
 
     # Upsert Orders
     orders_query = """
@@ -162,10 +135,11 @@ def generate_and_load_orders(cur, product_ids):
 
     # Upsert Order Items
     items_query = """
-        INSERT INTO raw.order_items (order_id, product_id, quantity)
-        VALUES (%s, %s, %s)
+        INSERT INTO raw.order_items (order_id, product_id, quantity, unit_price)
+        VALUES (%s, %s, %s, %s)
         ON CONFLICT (order_id, product_id) DO UPDATE SET
-            quantity = EXCLUDED.quantity;
+            quantity = EXCLUDED.quantity,
+            unit_price = EXCLUDED.unit_price;
     """
     execute_batch(cur, items_query, order_items)
     print(f"Upserted {len(order_items)} order items.")
